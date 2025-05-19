@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zartek_machine/features/authentication/controller/auth_controller.dart';
@@ -19,14 +18,16 @@ void logoutAlertDialog(BuildContext context) {
             child: const Text('Cancel'),
           ),
           Consumer(
-            builder: (context,ref,child) {
+            builder: (context, ref, child) {
               return TextButton(
                 onPressed: () async {
-                  ref.read(authControllerProvider.notifier).logOut(context: context);
+                  ref
+                      .read(authControllerProvider.notifier)
+                      .logOut(context: context);
                 },
                 child: const Text('Logout'),
               );
-            }
+            },
           ),
         ],
       );

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,48 +14,55 @@ import '../../../../core/type_def.dart';
 import '../../../core/constants/firebase_constants.dart';
 
 final homeRepositoryProvider = Provider<HomeRepository>((ref) {
-  return HomeRepository(firestrore: ref.watch(fireStoreProvider),
-      auth: ref.watch(firebaseAuthProvider),
-      googleSign: ref.watch(googleSignInProvider));
+  return HomeRepository(
+    firestrore: ref.watch(fireStoreProvider),
+    auth: ref.watch(firebaseAuthProvider),
+    googleSign: ref.watch(googleSignInProvider),
+  );
 });
 
-class HomeRepository{
+class HomeRepository {
   final FirebaseFirestore _firestore;
-  HomeRepository({required FirebaseFirestore firestrore,
+  HomeRepository({
+    required FirebaseFirestore firestrore,
     required FirebaseAuth auth,
-    required GoogleSignIn googleSign})
-      :_firestore=firestrore;
-  CollectionReference get _userCollection => _firestore.collection(FirebaseConstants.userConstant);
+    required GoogleSignIn googleSign,
+  }) : _firestore = firestrore;
+  CollectionReference get _userCollection =>
+      _firestore.collection(FirebaseConstants.userConstant);
 
   Future<List<CategoryModel>> fetchCategoriesAndDishes() async {
-    List<CategoryModel> categoryList=[];
-    final url='https://faheemkodi.github.io/mock-menu-api/menu.json';
-    final uri=Uri.parse(url);
+    List<CategoryModel> categoryList = [];
+    final url = 'https://faheemkodi.github.io/mock-menu-api/menu.json';
+    final uri = Uri.parse(url);
     print("uri$uri");
-    final response=await http.get(uri);
-    if(response.statusCode==200)
-    {
-      final body=response.body;
-      Map json=jsonDecode(body);
-      final result=json['categories'] as List;
-      for (Map<String,dynamic> i in result){
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      final body = response.body;
+      Map json = jsonDecode(body);
+      final result = json['categories'] as List;
+      for (Map<String, dynamic> i in result) {
         categoryList.add(CategoryModel.fromMap(i));
       }
       return categoryList;
-    }
-    else{
+    } else {
       return [];
     }
   }
 
-  FutureEither<UserModel> updateCartWithDish({required DishesModel dish, required UserModel user, required bool isIncrement}) async {
+  FutureEither<UserModel> updateCartWithDish({
+    required DishesModel dish,
+    required UserModel user,
+    required bool isIncrement,
+  }) async {
     try {
       List<DishesModel> updatedCart = List.from(user.cart);
       int existingIndex = updatedCart.indexWhere((item) => item.id == dish.id);
 
       if (existingIndex != -1) {
         final existingDish = updatedCart[existingIndex];
-        int updatedQty = isIncrement ? existingDish.qty + 1 : existingDish.qty - 1;
+        int updatedQty =
+            isIncrement ? existingDish.qty + 1 : existingDish.qty - 1;
 
         if (updatedQty > 0) {
           updatedCart[existingIndex] = existingDish.copyWith(qty: updatedQty);
@@ -79,8 +85,7 @@ class HomeRepository{
     }
   }
 
-  FutureEither<UserModel> clearCart({
-    required UserModel user}) async {
+  FutureEither<UserModel> clearCart({required UserModel user}) async {
     try {
       UserModel updatedUserModel = user.copyWith(cart: []);
       await user.reference!.update(updatedUserModel.toMap());
@@ -95,8 +100,7 @@ class HomeRepository{
   }
 
   Future<UserModel> getUserData(UserModel model) async {
-    DocumentSnapshot snap=await _userCollection.doc(model.id).get();
-    return UserModel.fromMap(snap.data() as Map<String,dynamic>);
-}
-
+    DocumentSnapshot snap = await _userCollection.doc(model.id).get();
+    return UserModel.fromMap(snap.data() as Map<String, dynamic>);
+  }
 }

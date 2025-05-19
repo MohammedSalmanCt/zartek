@@ -7,8 +7,9 @@ import 'package:zartek_machine/features/home/screen/home_screen.dart';
 import '../../../core/common/widgets/snack_bar.dart';
 import '../repository/auth_repository.dart';
 
-final authControllerProvider =
-NotifierProvider<AuthController, bool>(() => AuthController());
+final authControllerProvider = NotifierProvider<AuthController, bool>(
+  () => AuthController(),
+);
 
 class AuthController extends Notifier<bool> {
   @override
@@ -20,84 +21,115 @@ class AuthController extends Notifier<bool> {
   AuthRepository get _authRepository => ref.read(authRepositoryProvider);
 
   /// google sign
-  Future<void> signInWithGoogle(
-      {required BuildContext context}) async {
-    state=true;
+  Future<void> signInWithGoogle({required BuildContext context}) async {
+    state = true;
     final user = await _authRepository.signInWithGoogle();
-    user.fold((l) {
-        snackBar(context,"Google Signing Failed!");
-        state=false;
-    }, (userModel) async {
-      final SharedPreferences preferences=await SharedPreferences.getInstance();
-           preferences.setString("uid",userModel.id);
-           ref.read(userProvider.notifier).update((state) => userModel,);
-        snackBar(context,"Google Signing Completed");
-          Navigator.push(
-              context, CupertinoPageRoute(
-              builder: (context) => HomeScreen()));
-      state=false;
-    });
+    user.fold(
+      (l) {
+        snackBar(context, "Google Signing Failed!");
+        state = false;
+      },
+      (userModel) async {
+        final SharedPreferences preferences =
+            await SharedPreferences.getInstance();
+        preferences.setString("uid", userModel.id);
+        ref.read(userProvider.notifier).update((state) => userModel);
+        snackBar(context, "Google Signing Completed");
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => HomeScreen()),
+        );
+        state = false;
+      },
+    );
   }
 
-  Future<void> signInWithEmail(
-      {required BuildContext context,required String email,required String password}) async {
-    state=true;
-    final user = await _authRepository.signInWithEmail(email: email, password: password);
-    user.fold((l) {
-        snackBar(context,"Signing Failed!");
-        state=false;
-    }, (userModel) async {
-      final SharedPreferences preferences=await SharedPreferences.getInstance();
-           preferences.setString("uid",userModel.id);
-           ref.read(userProvider.notifier).update((state) => userModel,);
-        snackBar(context,"Email Signing Completed");
-          Navigator.push(
-              context, CupertinoPageRoute(
-              builder: (context) => HomeScreen()));
-      state=false;
-    });
+  Future<void> signInWithEmail({
+    required BuildContext context,
+    required String email,
+    required String password,
+  }) async {
+    state = true;
+    final user = await _authRepository.signInWithEmail(
+      email: email,
+      password: password,
+    );
+    user.fold(
+      (l) {
+        snackBar(context, "Signing Failed!");
+        state = false;
+      },
+      (userModel) async {
+        final SharedPreferences preferences =
+            await SharedPreferences.getInstance();
+        preferences.setString("uid", userModel.id);
+        ref.read(userProvider.notifier).update((state) => userModel);
+        snackBar(context, "Email Signing Completed");
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => HomeScreen()),
+        );
+        state = false;
+      },
+    );
   }
 
-  Future<void> signInWithPassword(
-      {required BuildContext context,required String email,required String password}) async {
-    state=true;
-    final user = await _authRepository.signInWithPassword(email: email, password: password);
-    user.fold((l) {
-        snackBar(context,"The email has no account.");
-        state=false;
-    }, (userModel) async {
-      final SharedPreferences preferences=await SharedPreferences.getInstance();
-           preferences.setString("uid",userModel.id);
-           ref.read(userProvider.notifier).update((state) => userModel,);
-        snackBar(context,"Login Successfully");
-          Navigator.push(
-              context, CupertinoPageRoute(
-              builder: (context) => HomeScreen()));
-      state=false;
-    });
+  Future<void> signInWithPassword({
+    required BuildContext context,
+    required String email,
+    required String password,
+  }) async {
+    state = true;
+    final user = await _authRepository.signInWithPassword(
+      email: email,
+      password: password,
+    );
+    user.fold(
+      (l) {
+        snackBar(context, "The email has no account.");
+        state = false;
+      },
+      (userModel) async {
+        final SharedPreferences preferences =
+            await SharedPreferences.getInstance();
+        preferences.setString("uid", userModel.id);
+        ref.read(userProvider.notifier).update((state) => userModel);
+        snackBar(context, "Login Successfully");
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => HomeScreen()),
+        );
+        state = false;
+      },
+    );
   }
 
   /// logOut
-  Future<void> logOut({
-    required BuildContext context,
-  }) async {
-    state=true;
-    final logout=await _authRepository.logout();
-    logout.fold((l) {
-      Navigator.pop(context);
-      snackBar(context, "logout Failed");
-      state=false;
-    } , (r) async {
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      preferences.remove('uid');
+  Future<void> logOut({required BuildContext context}) async {
+    state = true;
+    final logout = await _authRepository.logout();
+    logout.fold(
+      (l) {
+        Navigator.pop(context);
+        snackBar(context, "logout Failed");
+        state = false;
+      },
+      (r) async {
+        SharedPreferences preferences = await SharedPreferences.getInstance();
+        preferences.remove('uid');
         Navigator.pushAndRemoveUntil(
-          context, CupertinoPageRoute(builder: (context) => LoginScreen()),(route) => false,);
+          context,
+          CupertinoPageRoute(builder: (context) => LoginScreen()),
+          (route) => false,
+        );
         snackBar(context, "Logout Successfully");
-        state=false;
-    },);
+        state = false;
+      },
+    );
   }
+
   /// logged user
-  getLoggedUser(String id){
+  getLoggedUser(String id) {
     return _authRepository.getLoggedUser(id);
   }
 }

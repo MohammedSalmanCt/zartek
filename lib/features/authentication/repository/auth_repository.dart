@@ -9,23 +9,27 @@ import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/type_def.dart';
 import '../../../core/constants/firebase_constants.dart';
 
-
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(firestrore: ref.watch(fireStoreProvider),
-      auth: ref.watch(firebaseAuthProvider),
-      googleSign: ref.watch(googleSignInProvider));
+  return AuthRepository(
+    firestrore: ref.watch(fireStoreProvider),
+    auth: ref.watch(firebaseAuthProvider),
+    googleSign: ref.watch(googleSignInProvider),
+  );
 });
 
-class AuthRepository{
+class AuthRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-  final GoogleSignIn  _googleSignIn;
-  AuthRepository({required FirebaseFirestore firestrore,
+  final GoogleSignIn _googleSignIn;
+  AuthRepository({
+    required FirebaseFirestore firestrore,
     required FirebaseAuth auth,
-    required GoogleSignIn googleSign})
-      :_firestore=firestrore,_auth=auth,
-        _googleSignIn=googleSign;
-  CollectionReference get _userCollection => _firestore.collection(FirebaseConstants.userConstant);
+    required GoogleSignIn googleSign,
+  }) : _firestore = firestrore,
+       _auth = auth,
+       _googleSignIn = googleSign;
+  CollectionReference get _userCollection =>
+      _firestore.collection(FirebaseConstants.userConstant);
 
   /// google sign
   FutureEither<UserModel> signInWithGoogle() async {
@@ -39,21 +43,27 @@ class AuthRepository{
       final googleAuth = await googleUser.authentication;
       print("2222222222222222222222222222");
       final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
       print("33333333333333333333333333333333");
       final userCredential = await _auth.signInWithCredential(credential);
       print("44444444444444444444444444444444444444");
-      final user=userCredential.user;
-     if(user==null)
-       {
-         return left(Failure("Google Signing Failed!"));
-       }
-     else{
-       DocumentReference reference=_userCollection.doc(user.uid);
-       UserModel userModel=UserModel(name: user.displayName??"", id: user.uid, cart: [],reference: reference, email: user.email??"");
-       await reference.set(userModel.toMap());
-       return right(userModel);
-     }
+      final user = userCredential.user;
+      if (user == null) {
+        return left(Failure("Google Signing Failed!"));
+      } else {
+        DocumentReference reference = _userCollection.doc(user.uid);
+        UserModel userModel = UserModel(
+          name: user.displayName ?? "",
+          id: user.uid,
+          cart: [],
+          reference: reference,
+          email: user.email ?? "",
+        );
+        await reference.set(userModel.toMap());
+        return right(userModel);
+      }
     } on FirebaseException catch (e) {
       if (e.code == 'INVALID_LOGIN_CREDENTIALS') {
         return left(Failure(e.code.toString()));
@@ -68,24 +78,26 @@ class AuthRepository{
     }
   }
 
-
   /// signup in Email
-  FutureEither<UserModel> signInWithEmail(
-      {required String email,required String password}) async {
+  FutureEither<UserModel> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
     try {
       UserModel? userModel;
-      await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      ).then((value) async {
-       userModel=UserModel(name: value.user?.displayName??"",
-           email: email, id: value.user!.uid,
-           cart: [],
-         reference:_userCollection.doc(value.user!.uid,)
-       );
-        await userModel?.reference?.set(userModel?.toMap());
-      },);
-        return right(userModel!);
+      await _auth
+          .createUserWithEmailAndPassword(email: email, password: password)
+          .then((value) async {
+            userModel = UserModel(
+              name: value.user?.displayName ?? "",
+              email: email,
+              id: value.user!.uid,
+              cart: [],
+              reference: _userCollection.doc(value.user!.uid),
+            );
+            await userModel?.reference?.set(userModel?.toMap());
+          });
+      return right(userModel!);
     } on FirebaseException catch (e) {
       if (e.code == 'INVALID_LOGIN_CREDENTIALS') {
         print("${e.code}sssssssssss");
@@ -94,7 +106,7 @@ class AuthRepository{
         print('Error: $e');
       }
       print(e.message);
-      return left(Failure( e.message!));
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
@@ -107,14 +119,19 @@ class AuthRepository{
   }) async {
     try {
       /// Sign in with email and password
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       final userId = userCredential.user?.uid;
       if (userId == null) {
         return left(Failure('Invalid Email or Password'));
       }
       DocumentSnapshot snapshot = await _userCollection.doc(userId).get();
       if (snapshot.exists) {
-        UserModel userModel = UserModel.fromMap(snapshot.data() as Map<String, dynamic>);
+        UserModel userModel = UserModel.fromMap(
+          snapshot.data() as Map<String, dynamic>,
+        );
         await _userCollection.doc(userId).update(userModel.toMap());
         return right(userModel);
       } else {
@@ -139,11 +156,10 @@ class AuthRepository{
     try {
       /// Sign out from Firebase
       print("User signed out from Firebase");
-      return right( await _auth.signOut());
-    }on FirebaseException catch(error){
+      return right(await _auth.signOut());
+    } on FirebaseException catch (error) {
       return left(Failure(error.message!));
-    }
-    catch (e) {
+    } catch (e) {
       print("Error during logout: $e");
       return left(Failure(e.toString()));
     }
@@ -152,7 +168,9 @@ class AuthRepository{
   /// logged User
   getLoggedUser(String id) async {
     DocumentSnapshot admin = await _userCollection.doc(id).get();
-    UserModel userModel = UserModel.fromMap(admin.data() as Map<String,dynamic>);
+    UserModel userModel = UserModel.fromMap(
+      admin.data() as Map<String, dynamic>,
+    );
     return userModel;
   }
 }

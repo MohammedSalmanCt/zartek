@@ -19,25 +19,28 @@ class LoginButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
     height = MediaQuery.of(context).size.height;
-    return  GestureDetector(
+    return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: width*0.85,
-        height: height*0.06,
-        decoration:  BoxDecoration(
+        width: width * 0.85,
+        height: height * 0.06,
+        decoration: BoxDecoration(
           color: buttonColor,
-            borderRadius: BorderRadius.circular(width*0.085)
+          borderRadius: BorderRadius.circular(width * 0.085),
         ),
         child: Row(
           children: [
-            SizedBox(width: 10,),
-            Image.asset(image,height: 35,width: width*(0.18),),
-            SizedBox(width:width*(0.13),),
-            Text(heading,style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.whiteColour,
-              fontSize: width*0.05,
-            ),),
+            SizedBox(width: 10),
+            Image.asset(image, height: 35, width: width * (0.18)),
+            SizedBox(width: width * (0.13)),
+            Text(
+              heading,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.whiteColour,
+                fontSize: width * 0.05,
+              ),
+            ),
           ],
         ),
       ),
