@@ -3,12 +3,14 @@ import 'package:zartek_machine/model/dishes_model.dart';
 
 class UserModel {
   final String name;
+  final String email;
   final String id;
   final DocumentReference? reference;
   final List<DishesModel> cart;
 
   const UserModel({
     required this.name,
+    required this.email,
     required this.id,
     this.reference,
     required this.cart,
@@ -17,11 +19,13 @@ class UserModel {
   UserModel copyWith({
     String? name,
     String? id,
+    String? email,
     DocumentReference? reference,
     List<DishesModel>? cart,
   }) {
     return UserModel(
       name: name ?? this.name,
+      email: email ?? this.email,
       id: id ?? this.id,
       reference: reference ?? this.reference,
       cart: cart ?? this.cart,
@@ -41,6 +45,7 @@ class UserModel {
     return UserModel(
       name: map['name'] ?? '',
       id: map['id'] ?? '',
+      email: map['email'] ?? '',
       reference: map["reference"]??"",
       cart: (map['cart'] as List<dynamic>?)
           ?.map((item) => DishesModel.fromMap(item as Map<String, dynamic>))

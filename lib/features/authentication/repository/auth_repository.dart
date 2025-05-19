@@ -50,7 +50,7 @@ class AuthRepository{
        }
      else{
        DocumentReference reference=_userCollection.doc(user.uid);
-       UserModel userModel=UserModel(name: user.displayName??"", id: user.uid, cart: [],reference: reference);
+       UserModel userModel=UserModel(name: user.displayName??"", id: user.uid, cart: [],reference: reference, email: user.email??"");
        await reference.set(userModel.toMap());
        return right(userModel);
      }
@@ -67,34 +67,69 @@ class AuthRepository{
       return left(Failure(e.toString()));
     }
   }
-  /// phone auth
-  FutureEither<UserModel> signInWithPhone() async {
+
+
+  /// signup in Email
+  FutureEither<UserModel> signInWithEmail(
+      {required String email,required String password}) async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      final googleAuth = await googleUser?.authentication;
-      final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
-     final userCredential = await _auth.signInWithCredential(credential);
-     final user=userCredential.user;
-     if(user==null)
-       {
-         return left(Failure("Google Signing Failed!"));
-       }
-     else{
-       DocumentReference reference=_userCollection.doc(user.uid);
-       UserModel userModel=UserModel(name: user.displayName??"", id: user.uid, cart: [],reference: reference);
-       await reference.set(userModel.toMap());
-       return right(userModel);
-     }
+      UserModel? userModel;
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      ).then((value) async {
+       userModel=UserModel(name: value.user?.displayName??"",
+           email: email, id: value.user!.uid,
+           cart: [],
+         reference:_userCollection.doc(value.user!.uid,)
+       );
+        await userModel?.reference?.set(userModel?.toMap());
+      },);
+        return right(userModel!);
     } on FirebaseException catch (e) {
       if (e.code == 'INVALID_LOGIN_CREDENTIALS') {
+        print("${e.code}sssssssssss");
         return left(Failure(e.code.toString()));
       } else {
-        print('Erroreeee: ${e.message}');
+        print('Error: $e');
       }
-      return left(Failure(e.message.toString()));
+      print(e.message);
+      return left(Failure( e.message!));
     } catch (e) {
-      print(e.toString());
+      return left(Failure(e.toString()));
+    }
+  }
+
+  /// sign in with password
+  FutureEither<UserModel> signInWithPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      /// Sign in with email and password
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final userId = userCredential.user?.uid;
+      if (userId == null) {
+        return left(Failure('Invalid Email or Password'));
+      }
+      DocumentSnapshot snapshot = await _userCollection.doc(userId).get();
+      if (snapshot.exists) {
+        UserModel userModel = UserModel.fromMap(snapshot.data() as Map<String, dynamic>);
+        await _userCollection.doc(userId).update(userModel.toMap());
+        return right(userModel);
+      } else {
+        return throw "Invalid login credentials";
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        print("Invalid login credentials: ${e.message}");
+        return left(Failure("Invalid login credentials"));
+      } else {
+        print('Error: ${e.message}');
+        return left(Failure(e.message ?? 'Unknown error occurred.'));
+      }
+    } catch (e) {
+      print("Error: ${e.toString()}");
       return left(Failure(e.toString()));
     }
   }

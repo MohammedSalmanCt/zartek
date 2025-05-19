@@ -41,10 +41,17 @@ class OrderScreen extends StatelessWidget {
          }
          return  userModel.cart.isEmpty
              ?Center(
-           child: SizedBox(
-             width: width,
-             height: height * 0.5,
-             child: Image.asset(AssetsConstants.empty),
+           child: Column(
+             crossAxisAlignment: CrossAxisAlignment.center,
+             mainAxisAlignment: MainAxisAlignment.center,
+             children: [
+               Text("Cart is Empty",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 15,color: AppColors.blackColour),),
+               SizedBox(
+                 width: width,
+                 height: height * 0.5,
+                 child: Image.asset(AssetsConstants.empty),
+               ),
+             ],
            ),
          )
              :SingleChildScrollView(
@@ -182,7 +189,7 @@ class OrderScreen extends StatelessWidget {
            return   Center(
                    child: Column(
                      children: [
-                       Text("Cart is Empty",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 15),),
+                       Text("Cart is Empty",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 15,color: AppColors.blackColour),),
                        SizedBox(
                        width: width,
                        height: height * 0.5,

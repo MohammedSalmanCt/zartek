@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zartek_machine/core/theme/pallete.dart';
+import 'package:zartek_machine/features/authentication/controller/auth_controller.dart';
 import '../../../core/common/global_variables.dart';
 
 class DrawerWidget extends StatelessWidget {
@@ -42,6 +43,10 @@ class DrawerWidget extends StatelessWidget {
                 ),
                 SizedBox(
                   width: width*(0.9),
+                  child: Center(child: Text(user?.email??"",style: TextStyle(color: AppColors.blackColour,fontSize: width*(0.05),fontWeight: FontWeight.w400),)),
+                ),
+                SizedBox(
+                  width: width*(0.9),
                   child: Center(child: Text(user?.id??"123",style: TextStyle(color: AppColors.blackColour,fontSize: width*(0.04),fontWeight: FontWeight.w400),)),
                 ),
               ],
@@ -53,7 +58,7 @@ class DrawerWidget extends StatelessWidget {
           builder: (context,ref,child) {
             return ListTile(
               onTap: () {
-
+                ref.read(authControllerProvider.notifier).logOut(context: context);
               },
               leading: Icon(Icons.logout,color: AppColors.appBarIconColour,size: width*(0.07),),
               title: Text("Log out",style: TextStyle(fontWeight: FontWeight.w600,fontSize: width*(0.045),color: AppColors.appBarIconColour),),

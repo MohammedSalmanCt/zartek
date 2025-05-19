@@ -70,11 +70,14 @@ class HomeScreen extends ConsumerWidget {
                 Column(
                   children: [
                     TabBar(
-                        labelColor: AppColors.selectTabColour,
-                        unselectedLabelColor: AppColors.unSelectedTabColour,
-                        indicatorColor: AppColors.selectTabColour,
-                        isScrollable: true,
-                        tabs:List.generate(categories.length, (index) => Tab(text: categories[index].name))
+                      isScrollable: true,
+                      labelColor: AppColors.selectTabColour,
+                      unselectedLabelColor: AppColors.unSelectedTabColour,
+                      indicatorColor: AppColors.selectTabColour,
+                      tabs: List.generate(
+                        categories.length,
+                            (index) => Tab(text: categories[index].name),
+                      ),
                     ),
                     Expanded(
                         child:TabBarView(

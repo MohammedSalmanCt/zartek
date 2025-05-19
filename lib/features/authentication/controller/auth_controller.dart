@@ -39,6 +39,44 @@ class AuthController extends Notifier<bool> {
     });
   }
 
+  Future<void> signInWithEmail(
+      {required BuildContext context,required String email,required String password}) async {
+    state=true;
+    final user = await _authRepository.signInWithEmail(email: email, password: password);
+    user.fold((l) {
+        snackBar(context,"Signing Failed!");
+        state=false;
+    }, (userModel) async {
+      final SharedPreferences preferences=await SharedPreferences.getInstance();
+           preferences.setString("uid",userModel.id);
+           ref.read(userProvider.notifier).update((state) => userModel,);
+        snackBar(context,"Email Signing Completed");
+          Navigator.push(
+              context, CupertinoPageRoute(
+              builder: (context) => HomeScreen()));
+      state=false;
+    });
+  }
+
+  Future<void> signInWithPassword(
+      {required BuildContext context,required String email,required String password}) async {
+    state=true;
+    final user = await _authRepository.signInWithPassword(email: email, password: password);
+    user.fold((l) {
+        snackBar(context,"The email has no account.");
+        state=false;
+    }, (userModel) async {
+      final SharedPreferences preferences=await SharedPreferences.getInstance();
+           preferences.setString("uid",userModel.id);
+           ref.read(userProvider.notifier).update((state) => userModel,);
+        snackBar(context,"Login Successfully");
+          Navigator.push(
+              context, CupertinoPageRoute(
+              builder: (context) => HomeScreen()));
+      state=false;
+    });
+  }
+
   /// logOut
   Future<void> logOut({
     required BuildContext context,
